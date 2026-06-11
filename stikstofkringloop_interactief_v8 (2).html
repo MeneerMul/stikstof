@@ -1,0 +1,306 @@
+
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: var(--font-sans, sans-serif); }
+.diagram-wrap { position: relative; width: 100%; }
+svg text { font-family: var(--font-sans, sans-serif); }
+.popup-overlay {
+  position: fixed; inset: 0; background: rgba(0,0,0,0.35); z-index: 100;
+  display: flex; align-items: center; justify-content: center; padding: 16px;
+}
+.popup-overlay.hidden { display: none; }
+.popup-card {
+  background: var(--color-background-primary); border-radius: var(--border-radius-lg);
+  border: 0.5px solid var(--color-border-secondary); padding: 20px 24px;
+  max-width: 420px; width: 100%; position: relative; max-height: 80vh; overflow-y: auto;
+}
+.popup-close {
+  position: absolute; top: 12px; right: 14px; background: none; border: none;
+  font-size: 20px; cursor: pointer; color: var(--color-text-secondary); line-height: 1;
+}
+.popup-close:hover { color: var(--color-text-primary); }
+.popup-tag {
+  display: inline-block; font-size: 11px; font-weight: 500; padding: 2px 8px;
+  border-radius: 4px; margin-bottom: 8px; text-transform: uppercase; letter-spacing: 0.04em;
+}
+.tag-stof { background: var(--color-background-warning); color: var(--color-text-warning); }
+.tag-proces { background: var(--color-background-info); color: var(--color-text-info); }
+.tag-verlies { background: var(--color-background-danger); color: var(--color-text-danger); }
+.popup-title { font-size: 16px; font-weight: 500; margin-bottom: 6px; color: var(--color-text-primary); }
+.popup-body { font-size: 14px; line-height: 1.65; color: var(--color-text-secondary); }
+.popup-body strong { font-weight: 500; color: var(--color-text-primary); }
+.popup-where {
+  margin-top: 12px; padding: 10px 12px; border-radius: var(--border-radius-md);
+  background: var(--color-background-secondary); border: 0.5px solid var(--color-border-tertiary);
+  font-size: 13px; color: var(--color-text-secondary);
+}
+.popup-where b { color: var(--color-text-primary); font-weight: 500; }
+.node-btn { cursor: pointer; }
+.node-btn:hover rect, .node-btn:hover ellipse { filter: brightness(0.93); }
+.knol-btn { cursor: pointer; }
+.knol-btn:hover rect { filter: brightness(0.93); }
+</style>
+
+<div class="diagram-wrap">
+<svg width="100%" viewBox="0 0 720 980" role="img" xmlns="http://www.w3.org/2000/svg">
+  <title>Interactieve stikstofkringloop</title>
+  <defs>
+    <marker id="arr" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="10" markerHeight="10" orient="auto-start-reverse">
+      <path d="M1 1L9 5L1 9" fill="none" stroke="context-stroke" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+    </marker>
+    <marker id="arr-dash" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="10" markerHeight="10" orient="auto-start-reverse">
+      <path d="M1 1L9 5L1 9" fill="none" stroke="#9ca3af" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+    </marker>
+    <marker id="arr-brown" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="10" markerHeight="10" orient="auto-start-reverse">
+      <path d="M1 1L9 5L1 9" fill="none" stroke="#92400e" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+    </marker>
+  </defs>
+
+  <!--
+    Pijl N2 → NO3:
+      N2 centrum: 355, 100  → onderkant: 355, 126
+      NO3 centrum: 460, 268 → linkerkant: 390, 268
+      Middelpunt pijl ≈ ( (355+390)/2, (126+268)/2 ) = (372, 197)
+      Blokje: breedte 152, hoogte 44 → gecentreerd op (372,197):
+        x = 372 - 76 = 296, y = 197 - 22 = 175
+      Pijl deel 1: (355,126) → (320, 175)  [stopt bij rand blokje boven]
+      Pijl deel 2: (320, 219) → (392, 268)  [begint aan onderkant blokje]
+  -->
+
+  <!-- Bruine pijl deel 1: N2 → bovenkant knolletjesblok -->
+  <path d="M355 126 L340 175" fill="none" stroke="#92400e" stroke-width="1.5" stroke-dasharray="6 3" marker-end="url(#arr-brown)"/>
+  <!-- Bruine pijl deel 2: onderkant knolletjesblok → NO3 -->
+  <path d="M370 219 L408 242" fill="none" stroke="#92400e" stroke-width="1.5" stroke-dasharray="6 3" marker-end="url(#arr-brown)"/>
+
+  <!-- N2 → NOx: fotochemisch -->
+  <path d="M413 100 L528 184" fill="none" stroke="#6b7280" stroke-width="1.2" marker-end="url(#arr)"/>
+  <text x="490" y="130" text-anchor="middle" font-size="10" fill="#6b7280" font-family="var(--font-sans,sans-serif)">fotochemisch</text>
+
+  <!-- NOx → NO3 -->
+  <path d="M563 210 L520 242" fill="none" stroke="#6b7280" stroke-width="1.2" marker-end="url(#arr)"/>
+
+  <!-- NO3 → NH3/NH4+ -->
+  <path d="M527 278 L508 328" fill="none" stroke="#6b7280" stroke-width="1.2" marker-end="url(#arr)"/>
+
+  <!-- NO3 uitspoeling -->
+  <path d="M530 268 L565 388" fill="none" stroke="#9ca3af" stroke-width="1.2" stroke-dasharray="4 3" marker-end="url(#arr-dash)"/>
+
+  <!-- NH3/NH4+ uitspoeling -->
+  <path d="M627 358 L625 388" fill="none" stroke="#9ca3af" stroke-width="1.2" stroke-dasharray="4 3" marker-end="url(#arr-dash)"/>
+
+  <!-- NO3 → N-org groen (assimilatie) -->
+  <path d="M435 294 L390 415" fill="none" stroke="#6b7280" stroke-width="1.2" marker-end="url(#arr)"/>
+  <text x="425" y="360" text-anchor="start" font-size="10" fill="#6b7280" font-family="var(--font-sans,sans-serif)">assimilatie</text>
+
+  <!-- NO3 → NH4+ ammonificatie -->
+  <path d="M392 278 L220 505" fill="none" stroke="#6b7280" stroke-width="1.2" marker-end="url(#arr)"/>
+  <text x="285" y="385" text-anchor="middle" font-size="10" fill="#6b7280" font-family="var(--font-sans,sans-serif)" transform="rotate(-60,285,385)">ammonificatie</text>
+
+  <!-- NH4+ → NO2 (nitrificatie) -->
+  <path d="M165 510 L150 442" fill="none" stroke="#6b7280" stroke-width="1.2" marker-end="url(#arr)"/>
+  <text x="140" y="480" text-anchor="end" font-size="10" fill="#6b7280" font-family="var(--font-sans,sans-serif)">nitrificatie</text>
+
+  <!-- NO2 → NO3 (nitrificatie) -->
+  <path d="M172 392 L392 268" fill="none" stroke="#6b7280" stroke-width="1.2" marker-end="url(#arr)"/>
+  <text x="272" y="318" text-anchor="middle" font-size="10" fill="#6b7280" font-family="var(--font-sans,sans-serif)">nitrificatie</text>
+
+  <!-- NH4+ ↔ NH3 -->
+  <path d="M232 559 L228 638" fill="none" stroke="#6b7280" stroke-width="1.2" marker-end="url(#arr)"/>
+  <path d="M218 638 L222 559" fill="none" stroke="#6b7280" stroke-width="1.2" marker-end="url(#arr)"/>
+
+  <!-- NH4+ uitspoeling -->
+  <path d="M163 545 L120 692" fill="none" stroke="#9ca3af" stroke-width="1.2" stroke-dasharray="4 3" marker-end="url(#arr-dash)"/>
+
+  <!-- NH3 → vervluchtiging -->
+  <path d="M163 670 L120 726" fill="none" stroke="#9ca3af" stroke-width="1.2" stroke-dasharray="4 3" marker-end="url(#arr-dash)"/>
+
+  <!-- deammonificatie -->
+  <path d="M162 520 L88 520 L88 100 L297 100" fill="none" stroke="#6b7280" stroke-width="1.2" marker-end="url(#arr)"/>
+  <text x="70" y="310" text-anchor="middle" font-size="9" fill="#6b7280" font-family="var(--font-sans,sans-serif)" transform="rotate(-90,70,310)">deammonificatie</text>
+
+  <!-- N-org groen → N-org blauw -->
+  <path d="M478 491 L472 555" fill="none" stroke="#6b7280" stroke-width="1.2" marker-end="url(#arr)"/>
+  <text x="490" y="520" text-anchor="start" font-size="10" fill="#6b7280" font-family="var(--font-sans,sans-serif)">vertering+</text>
+  <text x="490" y="532" text-anchor="start" font-size="10" fill="#6b7280" font-family="var(--font-sans,sans-serif)">assimilatie</text>
+
+  <!-- N-org blauw → N-org bacteriën -->
+  <path d="M488 621 L450 672" fill="none" stroke="#6b7280" stroke-width="1.2" marker-end="url(#arr)"/>
+
+  <!-- rottingsbacteriën: groen → NH3 -->
+  <path d="M340 491 L250 648" fill="none" stroke="#6b7280" stroke-width="1.2" marker-end="url(#arr)"/>
+  <!-- rottingsbacteriën: blauw → NH3 -->
+  <path d="M480 621 L258 655" fill="none" stroke="#6b7280" stroke-width="1.2" marker-end="url(#arr)"/>
+  <text x="320" y="588" text-anchor="middle" font-size="10" fill="#6b7280" font-family="var(--font-sans,sans-serif)">rottings-</text>
+  <text x="320" y="600" text-anchor="middle" font-size="10" fill="#6b7280" font-family="var(--font-sans,sans-serif)">bacteriën</text>
+
+  <!-- ureum → NH3 -->
+  <path d="M320 808 L238 680" fill="none" stroke="#6b7280" stroke-width="1.2" marker-end="url(#arr)"/>
+  <text x="262" y="758" text-anchor="middle" font-size="10" fill="#6b7280" font-family="var(--font-sans,sans-serif)" transform="rotate(-56,262,758)">ammonificatie</text>
+
+  <!-- N-org blauw → ureum (dissimilatie) -->
+  <path d="M612 584 L650 584 L650 818 L434 818" fill="none" stroke="#6b7280" stroke-width="1.2" marker-end="url(#arr)"/>
+  <text x="664" y="704" text-anchor="start" font-size="10" fill="#6b7280" font-family="var(--font-sans,sans-serif)" transform="rotate(90,664,704)">dissimilatie</text>
+
+  <!-- ===== NODES ===== -->
+
+  <!-- N2 -->
+  <g class="node-btn" onclick="showInfo('n2')">
+    <ellipse cx="355" cy="100" rx="58" ry="26" fill="#fef3c7" stroke="#d97706" stroke-width="1.2"/>
+    <text x="355" y="100" text-anchor="middle" dominant-baseline="central" font-size="14" font-weight="500" fill="#92400e" font-family="var(--font-sans,sans-serif)">N₂</text>
+  </g>
+
+  <!-- Knolletjesbacteriën label — gecentreerd op middelpunt pijl (355,184) -->
+  <g class="knol-btn" onclick="showInfo('knolletjes')">
+    <rect x="279" y="175" width="152" height="44" rx="8" fill="#fef3c7" stroke="#92400e" stroke-width="1.5"/>
+    <text x="355" y="193" text-anchor="middle" font-size="10" font-weight="500" fill="#78350f" font-family="var(--font-sans,sans-serif)">knolletjesbacteriën</text>
+    <text x="355" y="208" text-anchor="middle" font-size="10" fill="#92400e" font-family="var(--font-sans,sans-serif)">(vlinderbloemigen) ☞</text>
+  </g>
+
+  <!-- NOx -->
+  <g class="node-btn" onclick="showInfo('nox')">
+    <rect x="528" y="158" width="130" height="52" rx="10" fill="#fed7aa" stroke="#c2410c" stroke-width="1.2"/>
+    <text x="593" y="177" text-anchor="middle" font-size="13" font-weight="500" fill="#7c2d12" font-family="var(--font-sans,sans-serif)">NOₓ</text>
+    <text x="593" y="194" text-anchor="middle" font-size="11" fill="#9a3412" font-family="var(--font-sans,sans-serif)">stikstofoxiden</text>
+  </g>
+
+  <!-- NO3- -->
+  <g class="node-btn" onclick="showInfo('no3')">
+    <rect x="390" y="242" width="140" height="52" rx="10" fill="#fef3c7" stroke="#d97706" stroke-width="1.2"/>
+    <text x="460" y="261" text-anchor="middle" font-size="13" font-weight="500" fill="#78350f" font-family="var(--font-sans,sans-serif)">NO₃⁻</text>
+    <text x="460" y="278" text-anchor="middle" font-size="11" fill="#92400e" font-family="var(--font-sans,sans-serif)">(nitraat)</text>
+  </g>
+
+  <!-- NH3/NH4+ -->
+  <g class="node-btn" onclick="showInfo('nh4gas')">
+    <rect x="490" y="328" width="140" height="44" rx="10" fill="#fef3c7" stroke="#d97706" stroke-width="1.2"/>
+    <text x="560" y="354" text-anchor="middle" dominant-baseline="central" font-size="12" font-weight="500" fill="#78350f" font-family="var(--font-sans,sans-serif)">NH₃/NH₄⁺</text>
+  </g>
+
+  <!-- Uitspoeling rechts -->
+  <g class="node-btn" onclick="showInfo('uitspoeling')">
+    <rect x="510" y="388" width="110" height="34" rx="6" fill="#fee2e2" stroke="#dc2626" stroke-width="1"/>
+    <text x="565" y="405" text-anchor="middle" dominant-baseline="central" font-size="11" font-weight="500" fill="#7f1d1d" font-family="var(--font-sans,sans-serif)">⬛ uitspoeling</text>
+  </g>
+
+  <!-- NO2- -->
+  <g class="node-btn" onclick="showInfo('no2')">
+    <rect x="72" y="390" width="118" height="52" rx="10" fill="#fef3c7" stroke="#d97706" stroke-width="1.2"/>
+    <text x="131" y="409" text-anchor="middle" font-size="13" font-weight="500" fill="#78350f" font-family="var(--font-sans,sans-serif)">NO₂⁻</text>
+    <text x="131" y="426" text-anchor="middle" font-size="11" fill="#92400e" font-family="var(--font-sans,sans-serif)">(nitriet)</text>
+  </g>
+
+  <!-- NH4+ -->
+  <g class="node-btn" onclick="showInfo('nh4')">
+    <rect x="162" y="505" width="148" height="54" rx="10" fill="#fef3c7" stroke="#d97706" stroke-width="1.5"/>
+    <text x="236" y="524" text-anchor="middle" font-size="13" font-weight="500" fill="#78350f" font-family="var(--font-sans,sans-serif)">NH₄⁺</text>
+    <text x="236" y="541" text-anchor="middle" font-size="11" fill="#92400e" font-family="var(--font-sans,sans-serif)">(ammoniumionen)</text>
+  </g>
+
+  <!-- NH3 ammoniak -->
+  <g class="node-btn" onclick="showInfo('nh3')">
+    <rect x="162" y="638" width="120" height="52" rx="10" fill="#fef3c7" stroke="#d97706" stroke-width="1.5"/>
+    <text x="222" y="657" text-anchor="middle" font-size="13" font-weight="500" fill="#78350f" font-family="var(--font-sans,sans-serif)">NH₃</text>
+    <text x="222" y="674" text-anchor="middle" font-size="11" fill="#92400e" font-family="var(--font-sans,sans-serif)">(ammoniak)</text>
+  </g>
+
+  <!-- Uitspoeling links -->
+  <g class="node-btn" onclick="showInfo('uitspoeling')">
+    <rect x="74" y="692" width="110" height="34" rx="6" fill="#fee2e2" stroke="#dc2626" stroke-width="1"/>
+    <text x="129" y="709" text-anchor="middle" dominant-baseline="central" font-size="11" font-weight="500" fill="#7f1d1d" font-family="var(--font-sans,sans-serif)">⬛ uitspoeling</text>
+  </g>
+
+  <!-- Vervluchtiging -->
+  <g class="node-btn" onclick="showInfo('vervluchtiging')">
+    <rect x="74" y="726" width="110" height="34" rx="6" fill="#fee2e2" stroke="#dc2626" stroke-width="1"/>
+    <text x="129" y="743" text-anchor="middle" dominant-baseline="central" font-size="11" font-weight="500" fill="#7f1d1d" font-family="var(--font-sans,sans-serif)">⬛ vervluchtiging</text>
+  </g>
+
+  <!-- N-org groen — producenten -->
+  <g class="node-btn" onclick="showInfo('norg_plant')">
+    <rect x="298" y="415" width="182" height="76" rx="10" fill="#dcfce7" stroke="#16a34a" stroke-width="1.2"/>
+    <text x="389" y="432" text-anchor="middle" font-size="11" font-weight="600" fill="#14532d" font-family="var(--font-sans,sans-serif)">Producenten</text>
+    <text x="389" y="447" text-anchor="middle" font-size="11" fill="#14532d" font-family="var(--font-sans,sans-serif)">N-bevattende org. stoffen</text>
+    <text x="389" y="462" text-anchor="middle" font-size="11" fill="#14532d" font-family="var(--font-sans,sans-serif)">(aminozuren, DNA,</text>
+    <text x="389" y="477" text-anchor="middle" font-size="11" fill="#166534" font-family="var(--font-sans,sans-serif)">chlorofyl)</text>
+  </g>
+
+  <!-- N-org blauw — consumenten -->
+  <g class="node-btn" onclick="showInfo('norg_dier')">
+    <rect x="446" y="555" width="170" height="66" rx="10" fill="#dbeafe" stroke="#2563eb" stroke-width="1.2"/>
+    <text x="531" y="572" text-anchor="middle" font-size="11" font-weight="600" fill="#1e3a8a" font-family="var(--font-sans,sans-serif)">Consumenten</text>
+    <text x="531" y="587" text-anchor="middle" font-size="11" fill="#1e3a8a" font-family="var(--font-sans,sans-serif)">N-bevattende org. stoffen</text>
+    <text x="531" y="602" text-anchor="middle" font-size="10" fill="#1d4ed8" font-family="var(--font-sans,sans-serif)">(aminozuren, DNA)</text>
+  </g>
+
+  <!-- N-org bacteriën — bruin -->
+  <g class="node-btn" onclick="showInfo('norg_bact')">
+    <rect x="350" y="672" width="172" height="52" rx="10" fill="#fde68a" stroke="#92400e" stroke-width="1.5"/>
+    <text x="436" y="691" text-anchor="middle" font-size="12" font-weight="500" fill="#78350f" font-family="var(--font-sans,sans-serif)">N-bevattende</text>
+    <text x="436" y="707" text-anchor="middle" font-size="12" font-weight="500" fill="#78350f" font-family="var(--font-sans,sans-serif)">org. st. in bacteriën</text>
+  </g>
+
+  <!-- Ureum -->
+  <g class="node-btn" onclick="showInfo('ureum')">
+    <rect x="304" y="794" width="130" height="48" rx="10" fill="#e5e7eb" stroke="#6b7280" stroke-width="1.2"/>
+    <text x="369" y="813" text-anchor="middle" font-size="13" font-weight="500" fill="#1f2937" font-family="var(--font-sans,sans-serif)">ureum</text>
+    <text x="369" y="829" text-anchor="middle" font-size="11" fill="#374151" font-family="var(--font-sans,sans-serif)">urinezuur</text>
+  </g>
+
+  <!-- Legenda -->
+  <rect x="40" y="870" width="640" height="50" rx="8" fill="none" stroke="var(--color-border-tertiary,#e5e7eb)" stroke-width="0.5"/>
+  <rect x="56" y="888" width="14" height="14" rx="3" fill="#fef3c7" stroke="#d97706" stroke-width="1"/>
+  <text x="76" y="899" font-size="11" fill="#6b7280" font-family="var(--font-sans,sans-serif)">anorganisch</text>
+  <rect x="170" y="888" width="14" height="14" rx="3" fill="#dcfce7" stroke="#16a34a" stroke-width="1"/>
+  <text x="190" y="899" font-size="11" fill="#6b7280" font-family="var(--font-sans,sans-serif)">producenten</text>
+  <rect x="290" y="888" width="14" height="14" rx="3" fill="#dbeafe" stroke="#2563eb" stroke-width="1"/>
+  <text x="310" y="899" font-size="11" fill="#6b7280" font-family="var(--font-sans,sans-serif)">consumenten</text>
+  <rect x="420" y="888" width="14" height="14" rx="3" fill="#fde68a" stroke="#92400e" stroke-width="1.5"/>
+  <text x="440" y="899" font-size="11" fill="#6b7280" font-family="var(--font-sans,sans-serif)">reducenten</text>
+  <rect x="536" y="888" width="14" height="14" rx="3" fill="#fee2e2" stroke="#dc2626" stroke-width="1"/>
+  <text x="556" y="899" font-size="11" fill="#6b7280" font-family="var(--font-sans,sans-serif)">verliesprocessen</text>
+</svg>
+</div>
+
+<!-- Popup -->
+<div class="popup-overlay hidden" id="popup" onclick="closeIfBackdrop(event)">
+  <div class="popup-card">
+    <button class="popup-close" onclick="closePopup()" aria-label="Sluiten">×</button>
+    <span class="popup-tag" id="popup-tag"></span>
+    <div class="popup-title" id="popup-title"></div>
+    <div class="popup-body" id="popup-body"></div>
+    <div class="popup-where" id="popup-where" style="display:none"></div>
+  </div>
+</div>
+
+<script>
+const data = {
+  n2: { tag:'stof', tagClass:'tag-stof', title:'N₂ — Stikstofgas', body:'Stikstofgas maakt zo\'n <strong>78%</strong> van de atmosfeer uit. Het is een zeer stabiel, tweeatoomig gas dat door de meeste organismen <strong>niet direct bruikbaar</strong> is.', where:'<b>Voorkomen:</b> Hoofdzakelijk in de <strong>atmosfeer</strong> (lucht).' },
+  knolletjes: { tag:'proces', tagClass:'tag-proces', title:'Knolletjesbacteriën — Stikstoffixatie bij vlinderbloemigen', body:'Knolletjesbacteriën (<em>Rhizobium</em>) leven in kleine <strong>wortelknolletjes</strong> van vlinderbloemige planten zoals klaver, erwten, bonen en lupine. Ze zetten stikstofgas (N₂) om naar nitraat (NO₃⁻) — <strong>stikstoffixatie</strong>.<br><br>De relatie is een vorm van <strong>mutualisme</strong>: beide partijen profiteren.<br><br>🌿 <strong>De plant geeft:</strong> glucose als energiebron aan de bacteriën.<br>🦠 <strong>De bacterie geeft:</strong> nitraat (NO₃⁻) terug aan de plant.', where:'<b>Voorkomen:</b> In <strong>wortelknolletjes</strong> van vlinderbloemige planten in de <strong>bodem</strong>. Vlinderbloemigen worden ingezet als <em>groenbemesters</em>.' },
+  nox: { tag:'stof', tagClass:'tag-stof', title:'NOₓ — Stikstofoxiden', body:'Stikstofoxiden ontstaan bij fotochemische reacties, bliksem, verkeer en industrie. Via regenwater komen ze in de bodem als nitraat.', where:'<b>Voorkomen:</b> In de <strong>atmosfeer</strong>. Bij neerslag als nitraat in <strong>bodem en grondwater</strong>.' },
+  no3: { tag:'stof', tagClass:'tag-stof', title:'NO₃⁻ — Nitraat', body:'Nitraat is goed <strong>wateroplosbaar</strong> en makkelijk opneembaar door planten. Het kan worden omgezet naar N₂ (denitrificatie) of door planten worden geassimileerd.', where:'<b>Voorkomen:</b> Opgelost in <strong>bodemwater en grondwater</strong>.' },
+  nh4gas: { tag:'stof', tagClass:'tag-stof', title:'NH₃/NH₄⁺ — Ammoniak/ammonium', body:'Overgang tussen gasvorm NH₃ en ionvorm NH₄⁺. Bij hogere pH overheerst NH₃, bij lagere pH NH₄⁺.', where:'<b>Voorkomen:</b> Opgelost in <strong>bodemwater</strong> of als gas nabij mestbronnen.' },
+  no2: { tag:'stof', tagClass:'tag-stof', title:'NO₂⁻ — Nitriet', body:'Tussenproduct in de nitrificatie. Nitrietbacteriën zetten ammonium om naar nitriet; nitraatbacteriën zetten nitriet om naar nitraat.', where:'<b>Voorkomen:</b> Tijdelijk opgelost in <strong>bodemwater en grondwater</strong>.' },
+  nh4: { tag:'stof', tagClass:'tag-stof', title:'NH₄⁺ — Ammoniumionen', body:'Ammonium hecht goed aan bodemdeeltjes en is daardoor <strong>minder uitspoelingsgevoelig</strong> dan nitraat.', where:'<b>Voorkomen:</b> Geadsorbeerd aan <strong>bodemdeeltjes</strong> of opgelost in <strong>bodemwater</strong>.' },
+  nh3: { tag:'stof', tagClass:'tag-stof', title:'NH₃ — Ammoniak', body:'Gasvormige stikstofverbinding. Staat in evenwicht met NH₄⁺. Bij hoge pH en temperatuur meer NH₃ → meer vervluchtiging.', where:'<b>Voorkomen:</b> Als gas in de <strong>atmosfeer</strong> of opgelost in <strong>bodemwater</strong>.' },
+  norg_plant: { tag:'stof', tagClass:'tag-stof', title:'Producenten — N-bevattende organische stoffen', body:'Planten nemen NO₃⁻ of NH₄⁺ op via stikstofassimilatie en bouwen dit in in <strong>aminozuren, DNA, RNA en chlorofyl</strong>.', where:'<b>Voorkomen:</b> In cellen van <strong>planten en algen</strong>.' },
+  norg_dier: { tag:'stof', tagClass:'tag-stof', title:'Consumenten — N-bevattende organische stoffen', body:'Dieren verteren eiwitten en nucleïnezuren van planten/dieren. De rest wordt uitgescheiden als ureum of urinezuur.', where:'<b>Voorkomen:</b> In weefsels van <strong>dieren</strong>: spiereiwitten, enzymen, DNA.' },
+  norg_bact: { tag:'stof', tagClass:'tag-stof', title:'N-bevattende organische stoffen — Reducenten', body:'Rottingsbacteriën breken dode organische stof af. Via ammonificatie komt stikstof vrij als ammoniak.', where:'<b>Voorkomen:</b> In cellen van <strong>bacteriën en schimmels</strong> in de bodem.' },
+  ureum: { tag:'stof', tagClass:'tag-stof', title:'Ureum / Urinezuur', body:'Stikstofafvalproduct van zoogdieren (ureum) en vogels/reptielen (urinezuur). Urobacteriën zetten dit om naar ammoniak.', where:'<b>Voorkomen:</b> In <strong>urine</strong> en daarna in de <strong>bodem</strong>.' },
+  uitspoeling: { tag:'verliesproces', tagClass:'tag-verlies', title:'Uitspoeling — verliesproces', body:'Opgeloste stikstofverbindingen zakken met regenwater naar het <strong>grondwater</strong>.<br><br><strong>Gevolgen:</strong><br>• <strong>Eutrofiëring</strong>: overmatige algen- en rottingsbacteriegroei. De rottingsbacteriën verbruiken zuurstof bij het afbreken van algen → <strong>zuurstofgebrek</strong> → vissen sterven.<br>• <strong>Grondwaterverontreiniging</strong> (EU-norm nitraat: max. 50 mg/l).<br>• <strong>Verlies van meststoffen</strong>.', where:'<b>Traject:</b> Bodemwater → grondwater → sloten en rivieren.' },
+  vervluchtiging: { tag:'verliesproces', tagClass:'tag-verlies', title:'Vervluchtiging — verliesproces', body:'NH₄⁺ wordt bij hoge pH/temperatuur omgezet naar gasvormig NH₃ dat de atmosfeer ingaat.<br><br><strong>Gevolgen:</strong><br>• <strong>Stikstofverlies</strong> uit de bodem.<br>• <strong>Verzuring en vermesting</strong> van natuurgebieden via depositie.<br>• <strong>Bijdrage aan fijnstof</strong> (PM2.5).', where:'<b>Traject:</b> Bodem/mest → atmosfeer.' }
+};
+
+function showInfo(id) {
+  const d = data[id]; if (!d) return;
+  document.getElementById('popup-tag').textContent = d.tag;
+  document.getElementById('popup-tag').className = 'popup-tag ' + d.tagClass;
+  document.getElementById('popup-title').textContent = d.title;
+  document.getElementById('popup-body').innerHTML = d.body;
+  const w = document.getElementById('popup-where');
+  if (d.where) { w.innerHTML = d.where; w.style.display = 'block'; } else { w.style.display = 'none'; }
+  document.getElementById('popup').classList.remove('hidden');
+}
+function closePopup() { document.getElementById('popup').classList.add('hidden'); }
+function closeIfBackdrop(e) { if (e.target.id === 'popup') closePopup(); }
+document.addEventListener('keydown', e => { if (e.key === 'Escape') closePopup(); });
+</script>
